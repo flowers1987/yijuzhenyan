@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#e6e1d8" />
+  <meta name="description" content="一句箴言 · 极简治愈系人生箴言卡片" />
+  <title>一句箴言</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="assets/icon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- ============ 顶部品牌栏 ============ -->
+    <header class="topbar">
+      <div class="brand">一句箴言</div>
+      <div class="brand-sub" id="brandSub">静谧 · 沉淀 · 自愈</div>
+    </header>
+
+    <!-- ============ 视图容器 ============ -->
+    <main class="views">
+
+      <!-- 视图一：箴言卡片主页 -->
+      <section class="view view-home active" id="view-home">
+        <!-- 分类标签栏 -->
+        <nav class="cat-tabs" id="catTabs" aria-label="分类筛选"></nav>
+
+        <!-- 卡片舞台 -->
+        <div class="stage" id="stage">
+          <div class="card-wrap" id="cardWrap">
+            <!-- 卡片由 JS 渲染 -->
+            <article class="card" id="card">
+              <div class="card-cat" id="cardCat"></div>
+              <blockquote class="card-text" id="cardText"></blockquote>
+              <div class="card-foot">
+                <span class="card-date" id="cardDate"></span>
+                <button class="card-menu-btn" id="cardMenuBtn" aria-label="操作">···</button>
+              </div>
+            </article>
+          </div>
+
+          <!-- 空状态 -->
+          <div class="empty" id="emptyState" hidden>
+            <div class="empty-mark">「」</div>
+            <p class="empty-title">这里还很安静</p>
+            <p class="empty-desc">去写下一句，属于你的人生箴言。</p>
+            <button class="btn-ghost" id="emptyCreateBtn">写一句箴言</button>
+          </div>
+        </div>
+
+        <!-- 切换指示与翻页 -->
+        <div class="pager">
+          <button class="pager-btn" id="prevBtn" aria-label="上一张">‹</button>
+          <div class="dots" id="dots"></div>
+          <button class="pager-btn" id="nextBtn" aria-label="下一张">›</button>
+        </div>
+
+        <!-- 卡片操作菜单（编辑/删除） -->
+        <div class="sheet-mask" id="cardSheetMask" hidden>
+          <div class="sheet" id="cardSheet">
+            <button class="sheet-item" id="sheetEdit">编辑这句箴言</button>
+            <button class="sheet-item danger" id="sheetDelete">删除这句箴言</button>
+            <button class="sheet-item cancel" id="sheetCancel">取消</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 视图二：分类管理 -->
+      <section class="view view-cats" id="view-cats">
+        <div class="section-head">
+          <h2 class="section-title">分类管理</h2>
+          <p class="section-sub">独立维护你的箴言体系</p>
+        </div>
+        <ul class="cat-list" id="catList"></ul>
+        <button class="btn-primary block" id="addCatBtn">+ 新增分类</button>
+        <button class="btn-ghost block export-btn" id="exportBtn">导出数据 (.docx)</button>
+        <p class="export-hint">导出为 Word 文档，可转发到微信三方应用（WPS / Office）查看。</p>
+      </section>
+
+      <!-- 视图三：创建 / 编辑箴言 -->
+      <section class="view view-edit" id="view-edit">
+        <div class="section-head">
+          <h2 class="section-title" id="editTitle">写一句箴言</h2>
+          <p class="section-sub">只写一句话，安放此刻的心境</p>
+        </div>
+
+        <div class="field">
+          <textarea id="aphorismInput" class="aphorism-input" maxlength="60"
+            placeholder="例如：允许一切发生，然后温柔地继续。"
+            rows="3"></textarea>
+          <div class="counter"><span id="charCount">0</span> / 60</div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">选择分类</label>
+          <div class="cat-pick" id="catPick"></div>
+        </div>
+
+        <div class="edit-actions">
+          <button class="btn-ghost" id="cancelEditBtn">取消</button>
+          <button class="btn-primary" id="saveAphorismBtn">保存</button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ============ 底部导航 ============ -->
+    <nav class="tabbar" id="tabbar">
+      <button class="tab active" data-view="home">
+        <span class="tab-ico">❖</span><span class="tab-txt">卡片</span>
+      </button>
+      <button class="tab tab-create" data-view="edit">
+        <span class="tab-ico">+</span><span class="tab-txt">写</span>
+      </button>
+      <button class="tab" data-view="cats">
+        <span class="tab-ico">☰</span><span class="tab-txt">分类</span>
+      </button>
+    </nav>
+
+    <!-- 轻提示 -->
+    <div class="toast" id="toast" hidden></div>
+
+    <!-- 二次确认弹窗（删除等危险操作） -->
+    <div class="sheet-mask" id="confirmMask" hidden>
+      <div class="sheet confirm-sheet">
+        <p class="confirm-msg" id="confirmMsg"></p>
+        <button class="sheet-item danger" id="confirmYes">删除</button>
+        <button class="sheet-item cancel" id="confirmNo">取消</button>
+      </div>
+    </div>
+
+    <!-- 通用输入弹窗（分类名） -->
+    <div class="modal-mask" id="modalMask" hidden>
+      <div class="modal" id="modal">
+        <div class="modal-title" id="modalTitle">输入</div>
+        <input class="modal-input" id="modalInput" maxlength="12" placeholder="输入分类名称" />
+        <div class="modal-actions">
+          <button class="btn-ghost" id="modalCancel">取消</button>
+          <button class="btn-primary" id="modalOk">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/store.js"></script>
+  <script src="js/export-docx.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
