@@ -22,15 +22,18 @@
   font-size: 16px;
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; touch-action: manipulation; }
 
 html, body {
   margin: 0; padding: 0; height: 100%;
-  font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
+  -webkit-user-select: none;
+  user-select: none;
   text-rendering: optimizeLegibility;
 }
+input, textarea { -webkit-user-select: text; user-select: text; }
 
 body {
   /* 静谧柔光背景 */
@@ -39,7 +42,12 @@ body {
     radial-gradient(120% 100% at 82% 88%, #ddd6c8 0%, transparent 55%),
     linear-gradient(160deg, var(--bg-1), var(--bg-2));
   background-attachment: fixed;
+  position: fixed;
+  inset: 0;
+  width: 100%;
   overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: auto;
 }
 
 #app {
@@ -50,7 +58,8 @@ body {
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  /* 安全区适配（刘海/底部） */
+  overflow: hidden;
+  /* 安全区适配（刘海/底部 Home Indicator） */
   padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
 }
 
@@ -61,7 +70,7 @@ body {
   flex: 0 0 auto;
 }
 .brand {
-  font-family: "Noto Serif SC", serif;
+  font-family: "Songti SC", "STSong", Georgia, "Times New Roman", serif;
   font-weight: 500;
   font-size: 1.32rem;
   letter-spacing: 0.34em;
@@ -188,7 +197,7 @@ body {
 }
 .card-text {
   margin: 0;
-  font-family: "Noto Serif SC", serif;
+  font-family: "Songti SC", "STSong", Georgia, "Times New Roman", serif;
   font-weight: 300;
   font-size: 1.42rem;
   line-height: 2.05;
@@ -221,11 +230,11 @@ body {
 }
 .card-menu-btn:active { background: rgba(0,0,0,0.05); }
 
-/* 翻页动画态 */
-.card.swipe-out-left  { transform: translateX(-120%) rotate(-4deg); opacity: 0; }
-.card.swipe-out-right { transform: translateX(120%) rotate(4deg); opacity: 0; }
-.card.swipe-in-left   { transform: translateX(40%); opacity: 0; }
-.card.swipe-in-right  { transform: translateX(-40%); opacity: 0; }
+/* 翻页动画态（iOS 照片式 3D 透视） */
+.card.swipe-out-left  { transform: translateX(-110%) rotateY(20deg) scale(0.94); opacity: 0; }
+.card.swipe-out-right { transform: translateX(110%) rotateY(-20deg) scale(0.94); opacity: 0; }
+.card.swipe-in-left   { transform: translateX(36%) rotateY(-10deg) scale(0.97); opacity: 0; }
+.card.swipe-in-right  { transform: translateX(-36%) rotateY(10deg) scale(0.97); opacity: 0; }
 
 /* ---------------- 空状态 ---------------- */
 .empty {
@@ -239,7 +248,7 @@ body {
   padding: 0 30px;
 }
 .empty-mark {
-  font-family: "Noto Serif SC", serif;
+  font-family: "Songti SC", "STSong", Georgia, "Times New Roman", serif;
   font-size: 3rem;
   color: var(--ink-faint);
   opacity: 0.5;
@@ -327,7 +336,7 @@ body {
 /* ---------------- 通用区块标题 ---------------- */
 .section-head { padding: 26px 4px 18px; }
 .section-title {
-  font-family: "Noto Serif SC", serif;
+  font-family: "Songti SC", "STSong", Georgia, "Times New Roman", serif;
   font-weight: 500;
   font-size: 1.25rem;
   letter-spacing: 0.12em;
@@ -388,7 +397,7 @@ body {
   background: rgba(255,255,255,0.5);
   border-radius: var(--radius-sm);
   padding: 18px 18px;
-  font-family: "Noto Serif SC", serif;
+  font-family: "Songti SC", "STSong", Georgia, "Times New Roman", serif;
   font-weight: 300;
   font-size: 1.15rem;
   line-height: 1.9;
@@ -397,7 +406,7 @@ body {
   outline: none;
   transition: border 0.3s, box-shadow 0.3s;
 }
-.aphorism-input::placeholder { color: var(--ink-faint); font-family: "Noto Sans SC", sans-serif; font-weight: 300; }
+.aphorism-input::placeholder { color: var(--ink-faint); font-family: -apple-system, "PingFang SC", sans-serif; font-weight: 300; }
 .aphorism-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(138,154,168,0.18); }
 .counter { text-align: right; font-size: 0.72rem; color: var(--ink-faint); margin-top: 8px; letter-spacing: 0.06em; }
 
@@ -541,14 +550,14 @@ body {
   animation: modalIn 0.3s var(--ease);
 }
 @keyframes modalIn { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: none; } }
-.modal-title { font-family: "Noto Serif SC", serif; font-size: 1.05rem; letter-spacing: 0.08em; margin-bottom: 16px; color: var(--ink); }
+.modal-title { font-family: "Songti SC", "STSong", Georgia, "Times New Roman", serif; font-size: 1.05rem; letter-spacing: 0.08em; margin-bottom: 16px; color: var(--ink); }
 .modal-input {
   width: 100%;
   border: 1px solid var(--glass-bd);
   background: rgba(255,255,255,0.6);
   border-radius: 14px;
   padding: 13px 15px;
-  font-size: 0.98rem;
+  font-size: 16px;
   color: var(--ink);
   outline: none;
   transition: border 0.3s, box-shadow 0.3s;

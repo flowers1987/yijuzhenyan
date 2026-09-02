@@ -247,8 +247,10 @@
   el.cardWrap.addEventListener('pointermove', (e) => {
     if (!drag) return;
     drag.dx = e.clientX - drag.x0;
-    const rot = drag.dx / 36;
-    el.card.style.transform = `translateX(${drag.dx}px) rotate(${rot}deg)`;
+    const rot = drag.dx / 30;
+    const ry = drag.dx / 24;
+    const scale = 1 - Math.min(Math.abs(drag.dx) / 1800, 0.06);
+    el.card.style.transform = `translateX(${drag.dx}px) rotateY(${ry}deg) rotate(${rot}deg) scale(${scale})`;
     el.card.style.opacity = String(1 - Math.min(Math.abs(drag.dx) / 700, 0.35));
   });
   function endDrag(e) {
