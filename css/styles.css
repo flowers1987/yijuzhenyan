@@ -490,6 +490,20 @@ body {
   color: var(--ink-soft); text-align: center;
   padding: 8px; border-radius: 12px; background: rgba(138,154,168,0.10);
 }
+.sync-restore { margin-top: 14px; }
+.sync-restore summary {
+  font-size: 0.76rem; color: var(--ink-faint); cursor: pointer;
+  letter-spacing: 0.03em; padding: 4px 2px; user-select: none;
+}
+.sync-restore summary::-webkit-details-marker { color: var(--ink-faint); }
+.sync-restore .modal-input { width: 100%; margin: 10px 0 10px; font-size: 0.82rem; }
+.sync-restore .btn-ghost { margin-top: 0; }
+.sync-gistid {
+  margin: 14px 2px 0; font-size: 0.7rem; color: var(--ink-faint);
+  letter-spacing: 0.03em; line-height: 1.6;
+  word-break: break-all;
+}
+.sync-gistid #gistIdText { color: var(--ink-soft); }
 
 /* ---------------- 操作菜单 sheet ---------------- */
 .sheet-mask {

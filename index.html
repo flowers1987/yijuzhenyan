@@ -95,6 +95,11 @@
               placeholder="粘贴 GitHub Token（需 gist 权限）" />
             <button class="btn-primary block" id="connectBtn">开启同步</button>
             <p class="sync-tip">Token 在 github.com → Settings → Developer settings → Personal access tokens 生成，勾选 <b>gist</b> 权限即可。</p>
+            <details class="sync-restore">
+              <summary>我已在别处备份，用 Gist ID 恢复</summary>
+              <input class="modal-input" id="restoreIdInput" type="text" inputmode="text" autocomplete="off" placeholder="粘贴备份 Gist ID" />
+              <button class="btn-ghost block" id="restoreBtn">从备份恢复</button>
+            </details>
           </div>
 
           <div id="syncOn" hidden>
@@ -103,6 +108,7 @@
               <button class="btn-ghost danger" id="disconnectBtn">断开</button>
             </div>
             <label class="sync-auto"><input type="checkbox" id="autoSyncChk" checked /> 数据变动自动同步</label>
+            <p class="sync-gistid">备份 ID：<span id="gistIdText">—</span>（换手机时填入此 ID 即可恢复）</p>
           </div>
 
           <div class="sync-msg" id="syncMsg" hidden></div>

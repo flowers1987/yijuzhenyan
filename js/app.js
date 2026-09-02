@@ -62,6 +62,9 @@
     disconnectBtn: $('disconnectBtn'),
     autoSyncChk: $('autoSyncChk'),
     syncMsg: $('syncMsg'),
+    restoreIdInput: $('restoreIdInput'),
+    restoreBtn: $('restoreBtn'),
+    gistIdText: $('gistIdText'),
   };
 
   // ---------- 状态 ----------
@@ -610,6 +613,7 @@
     el.autoSyncChk.checked = Sync.auto;
     if (on) {
       el.syncState.textContent = '已开启 · 上次同步 ' + (Sync.lastSyncText() || '—');
+      el.gistIdText.textContent = Sync.gistId || '—';
     } else {
       el.syncState.textContent = '未开启同步（数据仅存本机，有丢失风险）';
     }
@@ -659,6 +663,26 @@
     });
   }
 
+  function onRestore() {
+    const id = el.restoreIdInput.value.trim();
+    if (!id) { toast('请输入 Gist ID'); return; }
+    Sync.setGistId(id);
+    el.syncState.textContent = '正在从备份恢复…';
+    Sync.pull()
+      .then((n) => {
+        renderHome(true); renderCatTabs(); renderCatList();
+        toast(n ? ('已恢复 ' + n + ' 项') : '备份为空或已是最新');
+        renderSyncPanel();
+        el.restoreIdInput.value = '';
+      })
+      .catch((e) => {
+        Sync.gistId = '';
+        try { localStorage.removeItem('yjzy_gist_id'); } catch (_) {}
+        el.syncState.textContent = (e && e.status === 404) ? 'Gist ID 不存在' : '恢复失败，请检查 ID';
+        renderSyncPanel();
+      });
+  }
+
   function initSync() {
     Sync.init();
     Store.onChange = () => Sync.schedulePush();
@@ -666,6 +690,7 @@
     el.connectBtn.addEventListener('click', onConnect);
     el.syncNowBtn.addEventListener('click', onSyncNow);
     el.disconnectBtn.addEventListener('click', onDisconnect);
+    el.restoreBtn.addEventListener('click', onRestore);
     el.autoSyncChk.addEventListener('change', () => {
       Sync.auto = el.autoSyncChk.checked;
       try { localStorage.setItem('yjzy_gist_auto', Sync.auto ? '1' : '0'); } catch (e) {}

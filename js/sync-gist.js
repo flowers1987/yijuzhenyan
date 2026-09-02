@@ -203,6 +203,12 @@
       } catch (e) {}
     },
 
+    /* ---------- 设置已存在的 Gist ID（换手机恢复用） ---------- */
+    setGistId: function (id) {
+      this.gistId = (id || '').trim();
+      this._saveCfg();
+    },
+
     lastSyncText: function () {
       if (!this.lastSync) return '';
       var d = new Date(this.lastSync);
