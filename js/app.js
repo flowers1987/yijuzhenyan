@@ -52,6 +52,16 @@
     confirmMsg: $('confirmMsg'),
     confirmYes: $('confirmYes'),
     confirmNo: $('confirmNo'),
+    // sync
+    syncState: $('syncState'),
+    syncOff: $('syncOff'),
+    syncOn: $('syncOn'),
+    tokenInput: $('tokenInput'),
+    connectBtn: $('connectBtn'),
+    syncNowBtn: $('syncNowBtn'),
+    disconnectBtn: $('disconnectBtn'),
+    autoSyncChk: $('autoSyncChk'),
+    syncMsg: $('syncMsg'),
   };
 
   // ---------- 状态 ----------
@@ -577,11 +587,112 @@
   }
 
   // =========================================================
+  //  云端同步（GitHub Gist）
+  // =========================================================
+  let syncMsgTimer = null;
+  function renderSyncStatus(s) {
+    if (!s) return;
+    el.syncMsg.textContent = s.msg;
+    el.syncMsg.hidden = false;
+    clearTimeout(syncMsgTimer);
+    syncMsgTimer = setTimeout(() => { el.syncMsg.hidden = true; }, 2400);
+    if (s.type === 'ok' && Sync.isConnected()) {
+      el.syncState.textContent = '已开启 · 上次同步 ' + (Sync.lastSyncText() || '—');
+    } else if (s.type !== 'ok') {
+      el.syncState.textContent = s.msg;
+    }
+  }
+
+  function renderSyncPanel() {
+    const on = Sync.isConnected();
+    el.syncOff.hidden = on;
+    el.syncOn.hidden = !on;
+    el.autoSyncChk.checked = Sync.auto;
+    if (on) {
+      el.syncState.textContent = '已开启 · 上次同步 ' + (Sync.lastSyncText() || '—');
+    } else {
+      el.syncState.textContent = '未开启同步（数据仅存本机，有丢失风险）';
+    }
+  }
+
+  function onConnect() {
+    const t = el.tokenInput.value.trim();
+    if (!t) { toast('请粘贴 GitHub Token'); return; }
+    el.connectBtn.disabled = true;
+    el.connectBtn.textContent = '连接中…';
+    el.syncState.textContent = '正在校验 Token…';
+    Sync.connect(t)
+      .then((login) => {
+        toast('已连接 ' + login);
+        renderSyncPanel();
+        return Sync.sync();
+      })
+      .then(() => {
+        renderHome(true); renderCatTabs(); renderCatList();
+        el.tokenInput.value = '';
+      })
+      .catch((e) => {
+        let m = (e && e.status === 401) ? 'Token 无效或已失效'
+          : (e && e.status === 403) ? 'Token 缺少 gist 权限，请重新生成（勾选 gist）'
+          : '连接失败：' + (e && e.message ? e.message : '网络错误');
+        toast(m);
+        el.syncState.textContent = m;
+      })
+      .then(() => {
+        el.connectBtn.disabled = false;
+        el.connectBtn.textContent = '开启同步';
+      });
+  }
+
+  function onSyncNow() {
+    el.syncState.textContent = '同步中…';
+    Sync.sync().then((ok) => {
+      if (ok) { renderHome(true); renderCatTabs(); renderCatList(); }
+    });
+  }
+
+  function onDisconnect() {
+    confirmDialog('断开同步？本地数据会保留，但之后不再自动备份到云端。', () => {
+      Sync.disconnect();
+      renderSyncPanel();
+      toast('已断开');
+    });
+  }
+
+  function initSync() {
+    Sync.init();
+    Store.onChange = () => Sync.schedulePush();
+    Sync.onStatus(renderSyncStatus);
+    el.connectBtn.addEventListener('click', onConnect);
+    el.syncNowBtn.addEventListener('click', onSyncNow);
+    el.disconnectBtn.addEventListener('click', onDisconnect);
+    el.autoSyncChk.addEventListener('change', () => {
+      Sync.auto = el.autoSyncChk.checked;
+      try { localStorage.setItem('yjzy_gist_auto', Sync.auto ? '1' : '0'); } catch (e) {}
+      renderSyncPanel();
+    });
+    renderSyncPanel();
+    // 启动即从云端恢复（换手机/重装后自动拉回数据）
+    if (Sync.isConnected()) {
+      el.syncState.textContent = '正在从云端恢复…';
+      Sync.pull()
+        .then((n) => {
+          renderHome(true); renderCatTabs(); renderCatList();
+          if (n) toast('已从云端恢复 ' + n + ' 项');
+        })
+        .catch(() => {
+          el.syncState.textContent = '云端连接异常，继续使用本机数据';
+        });
+    }
+  }
+
+  // =========================================================
   //  初始化
   // =========================================================
   renderCatTabs();
   renderHome(false);
   initCategoryDrag();
+  initSync();
   // 注册 Service Worker（离线可运行）
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});

@@ -50,6 +50,14 @@ function defaultState() {
 
 const Store = {
   data: null,
+  onChange: null, // 数据变更钩子（同步模块挂载点）
+
+  _changed() {
+    this.save();
+    if (typeof this.onChange === 'function') {
+      try { this.onChange(); } catch (e) { /* 忽略钩子异常 */ }
+    }
+  },
 
   load() {
     try {
@@ -90,7 +98,7 @@ const Store = {
     const color = MORANDI[this.data.categories.length % MORANDI.length];
     const cat = { id: uid(), name, color };
     this.data.categories.push(cat);
-    this.save();
+    this._changed();
     return cat;
   },
 
@@ -100,7 +108,7 @@ const Store = {
     name = (name || '').trim();
     if (!name) return false;
     cat.name = name;
-    this.save();
+    this._changed();
     return true;
   },
 
@@ -110,7 +118,7 @@ const Store = {
     this.data.categories.splice(idx, 1);
     // 同时移除该分类下的箴言
     this.data.aphorisms = this.data.aphorisms.filter((a) => a.categoryId !== id);
-    this.save();
+    this._changed();
     return true;
   },
 
@@ -126,7 +134,7 @@ const Store = {
     // 兜底：保留未出现在 orderedIds 中的分类（理论上不应发生）
     map.forEach((c) => next.push(c));
     this.data.categories = next;
-    this.save();
+    this._changed();
     return true;
   },
 
@@ -150,7 +158,7 @@ const Store = {
     if (!text) return null;
     const a = { id: uid(), text, categoryId, createdAt: Date.now() };
     this.data.aphorisms.push(a);
-    this.save();
+    this._changed();
     return a;
   },
 
@@ -161,7 +169,7 @@ const Store = {
     if (!text) return false;
     a.text = text;
     if (categoryId) a.categoryId = categoryId;
-    this.save();
+    this._changed();
     return true;
   },
 
@@ -169,12 +177,39 @@ const Store = {
     const idx = this.data.aphorisms.findIndex((a) => a.id === id);
     if (idx === -1) return false;
     this.data.aphorisms.splice(idx, 1);
-    this.save();
+    this._changed();
     return true;
   },
 
   count() {
     return this.data.aphorisms.length;
+  },
+
+  // 导出为 JSON 字符串（用于云端同步 / 备份文件）
+  exportData() {
+    return JSON.stringify({ version: 1, updatedAt: Date.now(), data: this.data });
+  },
+
+  // 从远程对象合并数据（按 id 去重合并，避免互相覆盖丢失）
+  // remote: { version, updatedAt, data: { categories, aphorisms } }
+  // 返回合并进来的条目数
+  mergeRemote(remote) {
+    if (!remote || !remote.data) return 0;
+    const rd = remote.data;
+    const catMap = new Map(this.data.categories.map((c) => [c.id, c]));
+    (rd.categories || []).forEach((c) => { if (c && c.id) catMap.set(c.id, c); });
+    const aphMap = new Map(this.data.aphorisms.map((a) => [a.id, a]));
+    const added = [];
+    (rd.aphorisms || []).forEach((a) => {
+      if (a && a.id) {
+        if (!aphMap.has(a.id)) added.push(a.id);
+        aphMap.set(a.id, a);
+      }
+    });
+    this.data.categories = Array.from(catMap.values());
+    this.data.aphorisms = Array.from(aphMap.values());
+    this.save();
+    return added.length;
   },
 };
 

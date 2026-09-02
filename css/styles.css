@@ -459,6 +459,37 @@ body {
   backdrop-filter: blur(8px);
 }
 .btn-ghost:active { transform: scale(0.97); background: rgba(255,255,255,0.7); }
+.btn-ghost.danger { color: #b07070; }
+
+/* ---------------- 云端同步 ---------------- */
+.sync-block {
+  margin-top: 8px;
+  padding: 20px 18px 22px;
+  background: var(--glass);
+  border: 1px solid var(--glass-bd);
+  border-radius: 22px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 22px rgba(90, 80, 66, 0.06);
+}
+.block-title { margin: 0 0 6px; font-size: 1rem; font-weight: 500; letter-spacing: 0.14em; color: var(--ink); }
+.block-desc { margin: 0 0 14px; font-size: 0.76rem; line-height: 1.7; color: var(--ink-faint); letter-spacing: 0.02em; }
+.sync-state {
+  font-size: 0.78rem; color: var(--ink-soft); letter-spacing: 0.04em;
+  padding: 10px 14px; border-radius: 14px;
+  background: rgba(138,154,168,0.10); margin-bottom: 14px;
+}
+#syncOff .modal-input { width: 100%; margin-bottom: 12px; }
+.sync-tip { margin: 12px 4px 0; font-size: 0.7rem; line-height: 1.6; color: var(--ink-faint); }
+.sync-tip b { color: var(--ink-soft); font-weight: 600; }
+.sync-row { display: flex; gap: 10px; }
+.sync-row .btn-ghost { flex: 1; padding: 13px; font-size: 0.88rem; }
+.sync-auto { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 0.8rem; color: var(--ink-soft); letter-spacing: 0.04em; }
+.sync-auto input { width: 16px; height: 16px; accent-color: #8a9aa8; }
+.sync-msg {
+  margin-top: 12px; font-size: 0.76rem; letter-spacing: 0.03em;
+  color: var(--ink-soft); text-align: center;
+  padding: 8px; border-radius: 12px; background: rgba(138,154,168,0.10);
+}
 
 /* ---------------- 操作菜单 sheet ---------------- */
 .sheet-mask {
