@@ -44,21 +44,43 @@
       };
     },
 
-    // 校验 Token：必须含 gist 权限（读响应头 X-OAuth-Scopes）
+    // 校验 Token：直接尝试真正的 Gist 写操作来验证「token 有效 + 含 gist 权限」，
+    // 不再依赖 /user 端点（部分网络会拦截 /user 但放行 /gists）。
+    // 同时区分「GitHub 说密码错（真·token 无效）」与「被网络/代理拦截（proxy 401）」。
     async connect(token) {
       token = (token || '').trim();
       if (!token) throw { status: 400, message: '请粘贴 GitHub Token' };
-      const r = await fetch('https://api.github.com/user', {
-        headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' },
-      });
-      if (r.status === 401) throw { status: 401, message: 'Token 无效或已失效' };
-      if (r.status === 403) throw { status: 403, message: 'Token 无访问权限' };
-      if (!r.ok) throw { status: r.status, message: '校验失败（HTTP ' + r.status + '）' };
-      const scopes = (r.headers.get('X-OAuth-Scopes') || '').toLowerCase();
-      if (scopes.indexOf('gist') === -1) {
+      this.token = token;
+      let probe, bodyText = '';
+      try {
+        probe = await fetch(API, {
+          method: 'POST',
+          headers: this._headers(),
+          body: JSON.stringify({ description: 'yjzy-connect-probe', public: false, files: { 'probe.txt': { content: 'ok' } } }),
+        });
+        bodyText = await probe.text().catch(() => '');
+      } catch (netErr) {
+        // fetch 抛错 = 网络层不可达（连不上 api.github.com）
+        throw { status: 0, message: '无法连接 api.github.com：你的网络/代理可能屏蔽了该地址，请换网络后重试。' };
+      }
+      if (probe.status === 401) {
+        // 区分 GitHub 的「Bad credentials」与代理返回的 401
+        if (!/bad credentials/i.test(bodyText)) {
+          throw { status: 0, message: '连接被网络/代理拦截（返回 401），不是 Token 问题。请换网络或检查代理设置。' };
+        }
+        throw { status: 401, message: 'Token 无效或已失效' };
+      }
+      if (probe.status === 403) {
         throw { status: 403, message: 'Token 缺少 gist 权限，请重新生成（勾选 gist）' };
       }
-      this.token = token;
+      if (!probe.ok) {
+        throw { status: probe.status, message: '校验失败（HTTP ' + probe.status + '）' };
+      }
+      // 校验通过：清理探测用的临时 Gist
+      try {
+        const pj = JSON.parse(bodyText);
+        if (pj && pj.id) await fetch(API + '/' + pj.id, { method: 'DELETE', headers: this._headers() }).catch(() => {});
+      } catch (e) { /* 忽略清理失败 */ }
       try { localStorage.setItem(K_TOKEN, token); } catch (e) {}
       this._status('已连接，正在首次同步…', 'info');
       return true;
