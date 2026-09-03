@@ -36,8 +36,9 @@ html, body {
 input, textarea { -webkit-user-select: text; user-select: text; }
 
 body {
-  /* 静谧柔光背景 */
-  background:
+  /* 静谧柔光背景（实心奶油基色，保证顶部状态栏透出同色） */
+  background-color: #efe9e0;
+  background-image:
     radial-gradient(120% 90% at 25% 12%, #f3eee6 0%, transparent 55%),
     radial-gradient(120% 100% at 82% 88%, #ddd6c8 0%, transparent 55%),
     linear-gradient(160deg, var(--bg-1), var(--bg-2));
