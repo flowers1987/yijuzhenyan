@@ -490,6 +490,9 @@ body {
   color: var(--ink-soft); text-align: center;
   padding: 8px; border-radius: 12px; background: rgba(138,154,168,0.10);
 }
+.backup-row { display: flex; gap: 10px; margin-top: 4px; }
+.backup-row .btn-primary.block, .backup-row .btn-ghost.block { width: auto; flex: 1; margin-top: 4px; }
+.sync-msg.err { color: #fff; background: #b4635a; }
 .sync-restore { margin-top: 14px; }
 .sync-restore summary {
   font-size: 0.76rem; color: var(--ink-faint); cursor: pointer;
