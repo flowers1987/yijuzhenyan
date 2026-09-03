@@ -1,5 +1,5 @@
 /* 「一句箴言」Service Worker — 离线缓存，便于安装为 App */
-const CACHE = 'yjzy-v6';
+const CACHE = 'yjzy-v7';
 const ASSETS = [
   'index.html',
   'css/styles.css',
@@ -7,6 +7,7 @@ const ASSETS = [
   'js/store.js',
   'js/export-docx.js',
   'js/backup.js',
+  'js/sync-gist.js',
   'manifest.json',
   'assets/icon-180.png',
   'assets/icon-192.png',
