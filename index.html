@@ -95,6 +95,36 @@
           </div>
           <div class="sync-msg" id="backupMsg" hidden></div>
         </div>
+
+        <!-- 云端同步（GitHub Gist 私有备份） -->
+        <div class="sync-block">
+          <h3 class="block-title">云端同步</h3>
+          <p class="block-desc">自动备份到你的 GitHub 私有 Gist，换手机 / 重装主屏 / 系统清理都不丢。Token 仅存本机，数据不落任何第三方服务器。</p>
+          <div class="sync-state" id="syncState">未开启同步</div>
+
+          <div id="syncOff">
+            <input class="modal-input" id="tokenInput" type="password" inputmode="text" autocomplete="off"
+              placeholder="粘贴 GitHub Token（需 gist 权限）" />
+            <button class="btn-primary block" id="connectBtn">开启同步</button>
+            <p class="sync-tip">Token 在 github.com → Settings → Developer settings → Personal access tokens 生成；勾选 <b>gist</b> 权限即可（用 classic token）。</p>
+            <details class="sync-restore">
+              <summary>我已在别处备份，用 Gist ID 恢复</summary>
+              <input class="modal-input" id="restoreIdInput" type="text" inputmode="text" autocomplete="off" placeholder="粘贴备份 Gist ID" />
+              <button class="btn-ghost block" id="restoreBtn">从备份恢复</button>
+            </details>
+          </div>
+
+          <div id="syncOn" hidden>
+            <div class="sync-row">
+              <button class="btn-ghost" id="syncNowBtn">立即同步</button>
+              <button class="btn-ghost danger" id="disconnectBtn">断开</button>
+            </div>
+            <label class="sync-auto"><input type="checkbox" id="autoSyncChk" checked /> 数据变动自动同步</label>
+            <p class="sync-gistid">备份 ID：<span id="gistIdText">—</span>（换手机时填入此 ID 即可恢复）</p>
+          </div>
+
+          <div class="sync-msg" id="syncMsg" hidden></div>
+        </div>
       </section>
 
       <!-- 视图三：创建 / 编辑箴言 -->
@@ -165,6 +195,7 @@
   <script src="js/store.js"></script>
   <script src="js/export-docx.js"></script>
   <script src="js/backup.js"></script>
+  <script src="js/sync-gist.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
