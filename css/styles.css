@@ -60,8 +60,8 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  /* 安全区适配（刘海/底部 Home Indicator） */
-  padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  /* 安全区适配：顶部由页面留出；底部交给 tabbar 自身吸收，避免 tabbar 下方出现空白 */
+  padding: env(safe-area-inset-top) 0 0;
 }
 
 /* ---------------- 顶部品牌 ---------------- */
@@ -296,8 +296,8 @@ body {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  margin: 0 18px 14px;
-  padding: 8px 10px;
+  margin: 0 18px 0;
+  padding: 8px 10px calc(10px + env(safe-area-inset-bottom));
   background: var(--glass);
   border: 1px solid var(--glass-bd);
   border-radius: 22px;
