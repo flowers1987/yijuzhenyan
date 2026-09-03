@@ -57,6 +57,19 @@
     importBtn: $('importBtn'),
     importFile: $('importFile'),
     backupMsg: $('backupMsg'),
+    // sync (云端同步)
+    syncState: $('syncState'),
+    syncOff: $('syncOff'),
+    syncOn: $('syncOn'),
+    tokenInput: $('tokenInput'),
+    connectBtn: $('connectBtn'),
+    syncNowBtn: $('syncNowBtn'),
+    disconnectBtn: $('disconnectBtn'),
+    autoSyncChk: $('autoSyncChk'),
+    syncMsg: $('syncMsg'),
+    restoreIdInput: $('restoreIdInput'),
+    restoreBtn: $('restoreBtn'),
+    gistIdText: $('gistIdText'),
   };
 
   // ---------- 状态 ----------
@@ -585,6 +598,7 @@
   //  数据备份（本地 .json，不依赖任何云服务）
   // =========================================================
   let backupMsgTimer = null;
+  let syncMsgTimer = null;
   function showBackupMsg(msg, ok) {
     el.backupMsg.textContent = msg;
     el.backupMsg.hidden = false;
@@ -615,6 +629,8 @@
           renderHome(true); renderCatTabs(); renderCatList();
           showBackupMsg(n ? ('已恢复 ' + n + ' 项') : '备份已是最新，无新增', true);
           toast(n ? ('已恢复 ' + n + ' 项') : '已导入');
+          // 若已开启云端同步，把恢复进来的数据也推上去
+          if (window.Sync && Sync.isConnected()) Sync.push().catch(() => {});
         })
         .catch((e) => {
           showBackupMsg(e && e.message ? e.message : '导入失败', false);
@@ -624,12 +640,132 @@
   }
 
   // =========================================================
+  //  云端同步（GitHub Gist 私有备份）
+  // =========================================================
+  function renderSyncStatus(s) {
+    if (!s) return;
+    el.syncMsg.textContent = s.msg;
+    el.syncMsg.hidden = false;
+    el.syncMsg.classList.toggle('err', s.type === 'err');
+    clearTimeout(syncMsgTimer);
+    syncMsgTimer = setTimeout(() => { el.syncMsg.hidden = true; }, 2800);
+    if (s.type === 'ok' && Sync.isConnected()) {
+      el.syncState.textContent = '已开启 · 上次同步 ' + (Sync.lastSyncText() || '—');
+    } else if (s.type === 'err') {
+      el.syncState.textContent = s.msg;
+    }
+  }
+
+  function renderSyncPanel() {
+    const on = Sync.isConnected();
+    el.syncOff.hidden = on;
+    el.syncOn.hidden = !on;
+    el.autoSyncChk.checked = Sync.auto;
+    if (on) {
+      el.syncState.textContent = '已开启 · 上次同步 ' + (Sync.lastSyncText() || '—');
+      el.gistIdText.textContent = Sync.gistId || '—';
+    } else {
+      el.syncState.textContent = '未开启同步（数据仅存本机，有丢失风险）';
+    }
+  }
+
+  function onConnect() {
+    const t = el.tokenInput.value.trim();
+    if (!t) { toast('请粘贴 GitHub Token'); return; }
+    el.connectBtn.disabled = true;
+    el.connectBtn.textContent = '校验中…';
+    el.syncState.textContent = '正在校验 Token…';
+    Sync.connect(t)
+      .then(() => Sync.push())
+      .then(() => {
+        renderHome(true); renderCatTabs(); renderCatList();
+        el.tokenInput.value = '';
+        toast('云端同步已开启');
+      })
+      .catch((e) => {
+        const m = (e && e.status === 403) ? (e.message || 'Token 缺少 gist 权限') :
+          (e && e.status === 401) ? 'Token 无效或已失效' :
+          (e && e.message) ? e.message : '连接失败';
+        toast(m);
+        el.syncState.textContent = '未开启同步：' + m;
+      })
+      .then(() => {
+        el.connectBtn.disabled = false;
+        el.connectBtn.textContent = '开启同步';
+        renderSyncPanel();
+      });
+  }
+
+  function onSyncNow() {
+    el.syncState.textContent = '同步中…';
+    Sync.push()
+      .then((ok) => { if (ok) { renderHome(true); renderCatTabs(); renderCatList(); } })
+      .catch(() => {});
+  }
+
+  function onDisconnect() {
+    confirmDialog('断开云端同步？本机数据会保留，但之后不再自动备份到云端。', () => {
+      Sync.disconnect();
+      renderSyncPanel();
+      toast('已断开');
+    });
+  }
+
+  function onRestore() {
+    const id = el.restoreIdInput.value.trim();
+    if (!id) { toast('请输入备份 Gist ID'); return; }
+    el.syncState.textContent = '正在从备份恢复…';
+    Sync.setGistId(id);
+    Sync.pull()
+      .then((n) => {
+        renderHome(true); renderCatTabs(); renderCatList();
+        toast(n ? ('已恢复 ' + n + ' 项') : '备份为空或已是最新');
+        el.restoreIdInput.value = '';
+        renderSyncPanel();
+      })
+      .catch((e) => {
+        Sync.setGistId('');
+        el.syncState.textContent = (e && e.status === 404) ? 'Gist ID 不存在' : ('恢复失败：' + (e && e.message || '请检查 ID'));
+        renderSyncPanel();
+      });
+  }
+
+  function initSync() {
+    Sync.init();
+    Store.onChange = () => Sync.schedulePush();
+    Sync.onStatus(renderSyncStatus);
+    el.connectBtn.addEventListener('click', onConnect);
+    el.syncNowBtn.addEventListener('click', onSyncNow);
+    el.disconnectBtn.addEventListener('click', onDisconnect);
+    el.restoreBtn.addEventListener('click', onRestore);
+    el.autoSyncChk.addEventListener('change', () => {
+      Sync.auto = el.autoSyncChk.checked;
+      try { localStorage.setItem('yjzy_gist_auto', Sync.auto ? '1' : '0'); } catch (e) {}
+      renderSyncPanel();
+    });
+    renderSyncPanel();
+    // 启动即从云端恢复（换手机 / 重装后自动拉回数据）
+    if (Sync.isConnected()) {
+      el.syncState.textContent = '正在从云端恢复…';
+      Sync.pull()
+        .then((n) => {
+          renderHome(true); renderCatTabs(); renderCatList();
+          if (n) toast('已从云端恢复 ' + n + ' 项');
+        })
+        .catch(() => {
+          el.syncState.textContent = '云端连接异常，继续使用本机数据';
+        });
+    }
+  }
+
+  // =========================================================
   //  初始化
   // =========================================================
   renderCatTabs();
   renderHome(false);
   initCategoryDrag();
   initBackup();
+  initSync();
   // 注册 Service Worker（离线可运行）
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
