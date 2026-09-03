@@ -510,7 +510,7 @@
 
   el.emptyCreateBtn.addEventListener('click', () => {
     state.editingId = null;
-    el.editTitle.textContent = '写一句箴言';
+    el.editTitle.textContent = '写成长语';
     el.aphorismInput.value = '';
     el.charCount.textContent = '0';
     renderCatPick();
@@ -573,7 +573,7 @@
     if (name === 'cats') renderCatList();
     if (name === 'edit') {
       if (!state.editingId) {
-        el.editTitle.textContent = '写一句箴言';
+        el.editTitle.textContent = '写成长语';
         el.aphorismInput.value = '';
         el.charCount.textContent = '0';
       }
