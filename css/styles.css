@@ -71,6 +71,7 @@ body {
   padding: 22px 26px 6px;
   text-align: center;
   flex: 0 0 auto;
+  animation: fadeIn 0.7s var(--ease) both;
 }
 .brand {
   font-family: "Songti SC", "STSong", Georgia, "Times New Roman", serif;
@@ -81,12 +82,25 @@ body {
   color: var(--ink);
 }
 .brand-sub {
-  margin-top: 6px;
-  font-size: 0.72rem;
+  margin-top: 8px;
+  font-size: 0.7rem;
   letter-spacing: 0.28em;
   text-indent: 0.28em;
   color: var(--ink-faint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
 }
+.brand-sub::before,
+.brand-sub::after {
+  content: "";
+  width: 22px;
+  height: 1px;
+  flex: 0 0 auto;
+}
+.brand-sub::before { background: linear-gradient(90deg, transparent, var(--ink-faint)); }
+.brand-sub::after  { background: linear-gradient(90deg, var(--ink-faint), transparent); }
 
 /* ---------------- 视图容器 ---------------- */
 .views {
@@ -103,8 +117,9 @@ body {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
-.view.active { display: flex; animation: fadeIn 0.45s var(--ease); }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.view.active { display: flex; animation: fadeIn 0.4s var(--ease); }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px) scale(0.992); } to { opacity: 1; transform: none; } }
+@keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
 /* ---------------- 分类标签栏 ---------------- */
 .cat-tabs {
@@ -143,7 +158,7 @@ body {
   color: #fff;
   background: var(--accent);
   border-color: transparent;
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 10px 22px -10px rgba(78, 68, 58, 0.45);
 }
 
 /* ---------------- 卡片舞台 ---------------- */
@@ -160,13 +175,15 @@ body {
   width: 100%;
   max-width: 360px;
   perspective: 1200px;
+  /* 轻微呼吸浮动，让画面有生命感 */
+  animation: floaty 7s ease-in-out infinite;
 }
 .card {
   position: relative;
   background: var(--card-bg);
   border: 1px solid var(--card-bd);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(22px) saturate(1.15);
   -webkit-backdrop-filter: blur(22px) saturate(1.15);
   padding: 46px 34px 30px;
@@ -182,9 +199,24 @@ body {
   cursor: grab;
 }
 .card:active { cursor: grabbing; }
+/* 右下角衬线引号水印，随分类色轻染 */
+.card::after {
+  content: "”";
+  position: absolute;
+  right: 18px;
+  bottom: -4px;
+  font-family: "Songti SC", "STSong", Georgia, serif;
+  font-size: 6.5rem;
+  line-height: 1.4;
+  color: var(--accent);
+  opacity: 0.08;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
 
 .card-cat {
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   letter-spacing: 0.22em;
   text-indent: 0.22em;
   color: var(--accent);
@@ -192,6 +224,10 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.4);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
 }
 .card-cat::before {
   content: "";
@@ -202,7 +238,7 @@ body {
   margin: 0;
   font-family: "Songti SC", "STSong", Georgia, "Times New Roman", serif;
   font-weight: 300;
-  font-size: 1.42rem;
+  font-size: 1.5rem;
   line-height: 2.05;
   letter-spacing: 0.04em;
   color: var(--ink);
@@ -256,6 +292,7 @@ body {
   color: var(--ink-faint);
   opacity: 0.5;
   margin-bottom: 18px;
+  animation: floaty 5s ease-in-out infinite;
 }
 .empty-title { font-size: 1.05rem; color: var(--ink-soft); margin: 0 0 8px; letter-spacing: 0.06em; }
 .empty-desc { font-size: 0.85rem; color: var(--ink-faint); margin: 0 0 26px; line-height: 1.7; }
@@ -270,17 +307,18 @@ body {
   padding: 18px 0 26px;
 }
 .pager-btn {
-  width: 44px; height: 44px;
+  width: 46px; height: 46px;
   border-radius: 50%;
   border: 1px solid var(--glass-bd);
   background: var(--glass);
   color: var(--ink-soft);
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  transition: transform 0.2s var(--ease), background 0.2s;
+  box-shadow: 0 8px 20px -12px rgba(78, 68, 58, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: transform 0.2s var(--ease), background 0.2s, box-shadow 0.2s;
 }
 .pager-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.7); }
 .pager-btn:disabled { opacity: 0.3; cursor: default; }
@@ -288,9 +326,9 @@ body {
 .dots .dot {
   width: 6px; height: 6px; border-radius: 50%;
   background: rgba(120, 110, 98, 0.28);
-  transition: all 0.3s var(--ease);
+  transition: all 0.35s var(--ease);
 }
-.dots .dot.on { background: var(--ink-soft); width: 18px; border-radius: 4px; }
+.dots .dot.on { background: var(--ink-soft); width: 20px; border-radius: 4px; }
 
 /* ---------------- 底部导航 ---------------- */
 .tabbar {
@@ -319,21 +357,22 @@ body {
   gap: 4px;
   padding: 6px 0;
   cursor: pointer;
-  font-size: 0.66rem;
-  letter-spacing: 0.08em;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
   transition: color 0.25s, transform 0.2s;
 }
-.tab-ico { font-size: 1.2rem; line-height: 1; font-weight: 300; }
+.tab-ico { font-size: 1.2rem; line-height: 1; font-weight: 300; transition: transform 0.28s var(--ease); }
 .tab.active { color: var(--ink); }
+.tab.active .tab-ico { transform: translateY(-2px) scale(1.08); }
 .tab:active { transform: scale(0.94); }
 .tab-create .tab-ico {
   width: 44px; height: 44px;
   border-radius: 50%;
-  background: var(--accent);
+  background: linear-gradient(180deg, #96a5b2 0%, #8595a3 100%);
   color: #fff;
   display: flex; align-items: center; justify-content: center;
   font-size: 1.7rem;
-  box-shadow: 0 6px 16px rgba(168, 140, 110, 0.5);
+  box-shadow: 0 8px 18px -6px rgba(138, 154, 168, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.25);
   transition: background 0.3s, transform 0.2s;
 }
 .tab-create:active .tab-ico { transform: scale(0.92); }
@@ -361,8 +400,13 @@ body {
   border-radius: var(--radius-sm);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  transition: transform 0.2s var(--ease), box-shadow 0.25s;
 }
-.cat-item .swatch { width: 14px; height: 14px; border-radius: 50%; flex: 0 0 auto; }
+.cat-item:active { transform: scale(0.985); }
+.cat-item .swatch {
+  width: 14px; height: 14px; border-radius: 50%; flex: 0 0 auto;
+  box-shadow: 0 2px 8px rgba(78, 68, 58, 0.28);
+}
 .cat-item .drag-handle {
   flex: 0 0 auto;
   color: var(--ink-faint);
@@ -438,13 +482,13 @@ body {
   border: none;
   border-radius: 16px;
   padding: 15px 20px;
-  background: var(--accent);
+  background: linear-gradient(180deg, #96a5b2 0%, #8595a3 100%);
   color: #fff;
   font-size: 0.95rem;
   letter-spacing: 0.12em;
   cursor: pointer;
-  transition: transform 0.2s, filter 0.2s;
-  box-shadow: var(--shadow-soft);
+  transition: transform 0.2s, filter 0.2s, box-shadow 0.25s;
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 .btn-primary:active { transform: scale(0.97); filter: brightness(0.96); }
 .btn-primary.block { width: 100%; flex: none; margin-top: 4px; }
@@ -526,13 +570,24 @@ body {
 }
 .sheet {
   width: 100%;
-  background: rgba(250, 247, 242, 0.96);
-  border-radius: 24px 24px 0 0;
+  background: rgba(250, 247, 242, 0.97);
+  border-radius: 26px 26px 0 0;
   padding: 10px 16px calc(16px + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   gap: 4px;
-  animation: sheetUp 0.3s var(--ease);
+  animation: sheetUp 0.32s var(--ease);
+  box-shadow: 0 -18px 50px -18px rgba(58, 53, 47, 0.35);
+}
+/* iOS 原生小把手 */
+.sheet::before {
+  content: "";
+  width: 38px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(58, 53, 47, 0.14);
+  margin: 2px auto 10px;
+  flex: 0 0 auto;
 }
 @keyframes sheetUp { from { transform: translateY(100%); } to { transform: none; } }
 .sheet-item {
@@ -567,14 +622,16 @@ body {
   left: 50%;
   bottom: 110px;
   transform: translateX(-50%);
-  background: rgba(58, 53, 47, 0.9);
+  background: rgba(48, 43, 38, 0.88);
   color: #fff;
-  padding: 11px 20px;
-  border-radius: 14px;
+  padding: 11px 24px;
+  border-radius: 999px;
   font-size: 0.82rem;
   letter-spacing: 0.05em;
   z-index: 50;
-  backdrop-filter: blur(6px);
+  box-shadow: 0 14px 34px -14px rgba(48, 43, 38, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   animation: toastIn 0.3s var(--ease);
 }
 @keyframes toastIn { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translateX(-50%); } }
@@ -597,9 +654,9 @@ body {
   width: 100%;
   max-width: 320px;
   background: rgba(250, 247, 242, 0.97);
-  border-radius: 22px;
+  border-radius: 24px;
   padding: 24px 22px 18px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.6);
   animation: modalIn 0.3s var(--ease);
 }
 @keyframes modalIn { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: none; } }
