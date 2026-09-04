@@ -48,8 +48,7 @@ body {
 
 #app {
   position: relative;
-  max-width: 480px;
-  margin: 0 auto;
+  width: 100%;
   height: 100%;
   height: 100dvh;
   display: flex;
