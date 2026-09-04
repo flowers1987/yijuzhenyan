@@ -1,5 +1,5 @@
-/* 「一句箴言」Service Worker — 离线缓存，便于安装为 App */
-const CACHE = 'yjzy-v17';
+/* 「一句箴言」Service Worker — 离线缓存 + 自动更新 */
+const CACHE = 'yjzy-v18';
 const ASSETS = [
   'index.html',
   'css/styles.css',
@@ -15,6 +15,9 @@ const ASSETS = [
   'assets/icon-maskable-512.png',
 ];
 
+/* 代码类资源（页面/样式/脚本）：网络优先，保证更新即时生效；离线回退缓存 */
+const FRESH = /\.(html|css|js)(\?|$)|\/$/;
+
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
@@ -29,13 +32,24 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
+  if (url.origin !== location.origin) return;
+  const fresh = FRESH.test(url.pathname);
+
   e.respondWith(
-    caches.match(e.request).then((hit) =>
-      hit || fetch(e.request).then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
-        return res;
-      }).catch(() => hit)
-    )
+    (fresh
+      ? fetch(e.request).then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+          return res;
+        }).catch(() => caches.match(e.request))
+      : caches.match(e.request).then((hit) =>
+          hit || fetch(e.request).then((res) => {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+            return res;
+          }).catch(() => hit)
+        )
+    ).then((res) => res || caches.match('index.html'))
   );
 });
