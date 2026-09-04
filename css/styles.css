@@ -296,7 +296,7 @@ body {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  margin: 0 18px;
+  margin: 0 18px 8px;
   padding: 10px 14px;
   /* 底部原生安全区与页面奶油背景一致（奶油色磨砂，不再透白） */
   background: rgba(239, 233, 224, 0.55);
