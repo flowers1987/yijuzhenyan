@@ -775,7 +775,7 @@
       reloaded = true;
       location.reload();
     });
-    navigator.serviceWorker.register('sw.js')
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
       .then((reg) => {
         // 每次启动主动检查 SW 更新（iOS PWA 不一定自动检查）
         reg.update().catch(() => {});
