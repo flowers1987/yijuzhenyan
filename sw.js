@@ -1,5 +1,5 @@
 /* 「一句箴言」Service Worker — 离线缓存，便于安装为 App */
-const CACHE = 'yjzy-v14';
+const CACHE = 'yjzy-v15';
 const ASSETS = [
   'index.html',
   'css/styles.css',
