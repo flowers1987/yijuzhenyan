@@ -160,6 +160,7 @@ body {
   border-color: transparent;
   box-shadow: 0 10px 22px -10px rgba(78, 68, 58, 0.45);
 }
+.cat-tab.active .dot { display: none; }
 
 /* ---------------- 卡片舞台 ---------------- */
 .stage {
@@ -321,7 +322,7 @@ body {
   transition: transform 0.2s var(--ease), background 0.2s, box-shadow 0.2s;
 }
 .pager-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.7); }
-.pager-btn:disabled { opacity: 0.3; cursor: default; }
+.pager-btn:disabled { opacity: 0.12; cursor: default; }
 .dots { display: flex; gap: 7px; align-items: center; min-width: 64px; justify-content: center; }
 .dots .dot {
   width: 6px; height: 6px; border-radius: 50%;
@@ -336,7 +337,7 @@ body {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  margin: 0 18px 8px;
+  margin: 0 18px 6px;
   padding: 10px 14px;
   /* 底部原生安全区与页面奶油背景一致（奶油色磨砂，不再透白） */
   background: rgba(239, 233, 224, 0.55);
