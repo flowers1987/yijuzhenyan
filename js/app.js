@@ -766,8 +766,30 @@
   initCategoryDrag();
   initBackup();
   initSync();
-  // 注册 Service Worker（离线可运行）
+  // 注册 Service Worker（离线可运行）+ 自动更新机制
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    let reloaded = false;
+    // 新 SW 接管控制权时，自动刷新一次页面（保证样式立即生效）
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (reloaded) return;
+      reloaded = true;
+      location.reload();
+    });
+    navigator.serviceWorker.register('sw.js')
+      .then((reg) => {
+        // 每次启动主动检查 SW 更新（iOS PWA 不一定自动检查）
+        reg.update().catch(() => {});
+        // 发现新版本安装就绪时提示用户
+        reg.addEventListener('updatefound', () => {
+          const nw = reg.installing;
+          if (!nw) return;
+          nw.addEventListener('statechange', () => {
+            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+              toast && toast('新版本已就绪，稍后自动生效');
+            }
+          });
+        });
+      })
+      .catch(() => {});
   }
 })();
