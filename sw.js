@@ -1,13 +1,13 @@
-/* 「一句箴言」Service Worker — 离线缓存 + 即时更新（v20） */
-const CACHE = 'yjzy-v20';
+/* 「一句箴言」Service Worker — 离线缓存 + 即时更新（v21） */
+const CACHE = 'yjzy-v21';
 const ASSETS = [
   'index.html',
-  'css/styles.css?v=20',
-  'js/store.js?v=20',
-  'js/export-docx.js?v=20',
-  'js/backup.js?v=20',
-  'js/sync-gist.js?v=20',
-  'js/app.js?v=20',
+  'css/styles.css?v=21',
+  'js/store.js?v=21',
+  'js/export-docx.js?v=21',
+  'js/backup.js?v=21',
+  'js/sync-gist.js?v=21',
+  'js/app.js?v=21',
   'manifest.json',
   'assets/icon-180.png',
   'assets/icon-192.png',
