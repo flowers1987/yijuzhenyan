@@ -1,13 +1,13 @@
-/* 「一句箴言」Service Worker — 离线缓存 + 自动更新 */
-const CACHE = 'yjzy-v18';
+/* 「一句箴言」Service Worker — 离线缓存 + 即时更新（v19） */
+const CACHE = 'yjzy-v19';
 const ASSETS = [
   'index.html',
-  'css/styles.css',
-  'js/app.js',
-  'js/store.js',
-  'js/export-docx.js',
-  'js/backup.js',
-  'js/sync-gist.js',
+  'css/styles.css?v=19',
+  'js/store.js?v=19',
+  'js/export-docx.js?v=19',
+  'js/backup.js?v=19',
+  'js/sync-gist.js?v=19',
+  'js/app.js?v=19',
   'manifest.json',
   'assets/icon-180.png',
   'assets/icon-192.png',
@@ -15,11 +15,19 @@ const ASSETS = [
   'assets/icon-maskable-512.png',
 ];
 
-/* 代码类资源（页面/样式/脚本）：网络优先，保证更新即时生效；离线回退缓存 */
+/* 代码类资源（html/css/js）：网络优先 + 强制跳过浏览器 HTTP 缓存，保证更新即时生效 */
 const FRESH = /\.(html|css|js)(\?|$)|\/$/;
 
+function putCache(req, res) {
+  if (!res || res.status !== 200 || res.type !== 'basic') return;
+  const copy = res.clone();
+  caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+}
+
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  e.waitUntil(
+    caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (e) => {
@@ -38,15 +46,13 @@ self.addEventListener('fetch', (e) => {
 
   e.respondWith(
     (fresh
-      ? fetch(e.request).then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+      ? fetch(e.request, { cache: 'no-cache' }).then((res) => {
+          putCache(e.request, res);
           return res;
         }).catch(() => caches.match(e.request))
       : caches.match(e.request).then((hit) =>
           hit || fetch(e.request).then((res) => {
-            const copy = res.clone();
-            caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+            putCache(e.request, res);
             return res;
           }).catch(() => hit)
         )
