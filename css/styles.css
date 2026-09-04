@@ -36,13 +36,8 @@ html, body {
 input, textarea { -webkit-user-select: text; user-select: text; }
 
 body {
-  /* 静谧柔光背景（实心奶油基色，保证顶部状态栏透出同色） */
+  /* 兜底实心奶油基色：避免底部安全区因背景 fixed 失效而透出白色 */
   background-color: #efe9e0;
-  background-image:
-    radial-gradient(120% 90% at 25% 12%, #f3eee6 0%, transparent 55%),
-    radial-gradient(120% 100% at 82% 88%, #ddd6c8 0%, transparent 55%),
-    linear-gradient(160deg, var(--bg-1), var(--bg-2));
-  background-attachment: fixed;
   position: fixed;
   inset: 0;
   width: 100%;
@@ -62,6 +57,13 @@ body {
   overflow: hidden;
   /* 安全区适配：仅顶部由页面留出；底部安全区已去掉，菜单栏贴底 */
   padding: env(safe-area-inset-top) 0 0;
+  /* 渐变背景铺满整个 #app（含底部 Home Indicator 安全区），
+     让内容区与最底部安全区颜色完全一致，避免透白 */
+  background-color: #efe9e0;
+  background-image:
+    radial-gradient(120% 90% at 25% 12%, #f3eee6 0%, transparent 55%),
+    radial-gradient(120% 100% at 82% 88%, #ddd6c8 0%, transparent 55%),
+    linear-gradient(160deg, var(--bg-1), var(--bg-2));
 }
 
 /* ---------------- 顶部品牌 ---------------- */
